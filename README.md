@@ -1,8 +1,81 @@
+## Hello
+
 - 官方说明: https://docs.sui.io/build/sui-local-network#install-sui-locally
 - 中文文档: https://move-book.com/cn/index.html
 - 英文文档:
-
   - packages: https://move-language.github.io/move/packages.html
+
+## 创建 SUI 项目
+
+创建命令: `sui move new hello_world`
+
+项目结构
+
+```
+├── Move.toml
+├── README.md
+├── doc_templates
+│   └── XXXX
+├── examples
+│   └── XXXX
+├── sources
+│   └── hello_world.move
+└── tests
+    └── XXXX
+```
+
+## Move.toml 3 个部分
+
+- package
+- dependencies
+- addresses
+
+## 常见命令
+
+```
+sui client addresses
+sui client active-address
+
+sui client active-env
+sui client envs
+
+sui move build
+```
+
+## sui move 语法
+
+```
+module package_name::module_name {
+
+    // imports
+    // use <Address/Alias>::<ModuleName>;
+    use std::string;
+    use sui::object::{Self,UID};
+    use sui::transfer;
+    use sui::tx_context::{Self,TxContext};
+
+
+    // types
+    // 拥有四种能力 copy,drop,key,store,
+    struct HelloWorldObjects has key,store{
+        id:UID,
+        text: string::String
+    }
+
+    // functions
+    // 拥有三种可见性: private/public/public(friend)
+
+    // entry 函数
+    public entry fun mint(ctx: &mut TxContext){
+        let object = HelloWorldObjects{
+            id : object::new(ctx),
+            text : string::utf8(b"Hello World!")
+        };
+        transfer::transfer(object,tx_context::sender(ctx));
+    }
+
+}
+```
 
 ## 菜单相关的媒体信息
 
