@@ -40,6 +40,11 @@ sui client active-env
 sui client envs
 
 sui move build
+
+sui client publish --gas-budget 3000 --skip-fetch-latest-git-deps
+
+# 调用方法
+sui client call --function mint2 --module hello_world --package 0x666 --args "你好，世界!" --gas-budget 3000
 ```
 
 ## sui move 语法
@@ -53,7 +58,6 @@ module package_name::module_name {
     use sui::object::{Self,UID};
     use sui::transfer;
     use sui::tx_context::{Self,TxContext};
-
 
     // types
     // 拥有四种能力 copy,drop,key,store,
@@ -73,7 +77,6 @@ module package_name::module_name {
         };
         transfer::transfer(object,tx_context::sender(ctx));
     }
-
 }
 ```
 

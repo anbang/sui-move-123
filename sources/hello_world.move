@@ -26,4 +26,11 @@ module hello_world::hello_world {
         transfer::transfer(object,tx_context::sender(ctx));
     }
     
+    public entry fun mint2(text: vector<u8>, ctx: &mut TxContext){
+        let object = HelloWorldObjects{
+            id : object::new(ctx),
+            text : string::utf8(text)
+        };
+        transfer::transfer(object,tx_context::sender(ctx));
+    }
 }
