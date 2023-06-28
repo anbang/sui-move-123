@@ -80,6 +80,26 @@ module package_name::module_name {
 }
 ```
 
+**所有权类型**
+
+- 被拥有
+  - 被一个地址拥有
+  - 被另一个 object 拥有
+- 共享
+  - 不可变的共享
+    - `transfer`
+  - 可变的共享
+
+**不可变的对象**: `transfer::freeze_object(obj)`
+
+**共享对象**: `transder::share_object(obj)`
+
+参数传递与删除 Object
+
+- view: `(transcriptObject : &TranscriptObject)`
+- update: `(transcriptObject : &mut TranscriptObject,score :u8)`
+- delete: `(transcriptObject : TranscriptObject)`
+
 ## 菜单相关的媒体信息
 
 - Discord: https://discord.com/invite/2gTrfhYrmu
