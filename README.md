@@ -6,6 +6,8 @@
   - packages: https://move-language.github.io/move/packages.html
 - sui farmework:
   - docs: https://github.com/MystenLabs/sui/tree/main/crates/sui-framework/docs
+- 教程: https://github.com/sui-foundation/sui-move-intro-course/blob/main/unit-four/lessons/2_dynamic_fields.md
+  - https://github.com/randypen/sui-move-intro-course-zh/blob/main/unit-four/lessons/2_dynamic_fields.md
 
 ## 创建 SUI 项目
 
@@ -142,49 +144,84 @@ module fungible_tokens::move{
 }
 ```
 
-## 菜单相关的媒体信息
+**数组**: vectors
 
-- Discord: https://discord.com/invite/2gTrfhYrmu
-- GitHub : https://github.com/FiboChain
-- telegram : https://t.me/FIBOGlobalCommunity
-- twitter : https://twitter.com/FIBOGlobal
-- Youtube : ❌ 隐藏
-- Blog : https://medium.com/@Fibonaccichain
-- 新闻 : ❌ 隐藏
-- 事件 : ❌ 隐藏
+- `vector::empty<T>()`
+- `vector::push_back<T>()` 创建
+- `vector::pop_back<T>(,value)` put
+- `vector::pop_back<T>()` remove
+- `vector::length<T>()` size
 
-## 顶部菜单
+**动态字段**
 
-- 开发者
-  - Start Building : 现在官网 - 开发者首页
-  - 设置本地环境 : ❌ 隐藏
-  - 开发者文档 : ❌ 隐藏
-  - 黑客松 : ❌ 隐藏
-  - Github : https://github.com/FiboChain
-  - 白皮书: https://fibonaccilabs.gitbook.io/litepaper_cn/gai-shu/gong-lian-jie-shao
-- 生态
-  - 跨链桥: https://bridge.fibochain.org/
-  - 钱包: 跳转到【当前官网-钱包页面-Figbox 区域】
-  - 浏览器: https://scan.fibochain.org/
-  - 发现应用: 【 当前官网-生态页面 】
-  - 应用提交: ❌ 隐藏
-- 关于: about 页面
+```
+struct Parent has key{
+  id: UID
+}
 
-## 底部菜单栏
+// dynamic field
+struct DFChild has store{
+  count:u64
+}
 
-- 使用 Fibo
-  - 获取 FIBO 币:【 当前官网-获取 FIBO 页面 】
-  - 发现应用【 当前官网-生态页面 】
-  - 质押 FIBO: ❌ 隐藏
-  - 安装钱包【当前官网-钱包页面】
-- Build
-  - 设置本地环境: ❌ 隐藏
-  - 部署只能合约: ❌ 隐藏
-  - 参与贡献: ❌ 隐藏
-  - 白皮书: https://fibonaccilabs.gitbook.io/litepaper_cn/gai-shu/gong-lian-jie-shao
-  - 资源下载: ❌ 隐藏
-- About
-  - 隐私协议: ❌ 隐藏
-  - FAQ: ❌ 隐藏
-  - 联系我们: https://discord.com/invite/2gTrfhYrmu
-  - 博客: https://medium.com/@Fibonaccichain
+
+// dynamic object field
+struct DOFChild has key,store{
+  id:UID,
+  count:u64
+}
+```
+
+- 动态字段：可以存储任何具有 store 能力的值，但是储存在这种字段种的对象被视为被包装过。无法直接访问，可以通过浏览器查看存储 ID
+- 动态对象字段：值必须是 Sui 对象（具有 key store，以及 `id: UID` 作为第一个字段）。仍然可以通过对象 id 直接访问被附上。
+
+方法
+
+- 添加都是 `xxx::add()`，但是使用不同的包 `ofield / field`
+- 修改: `xxx::borrow`
+- 删除: `xxx::remove`
+  - 动态: `object::delete(id);`
+  - 动态对象: `transfer::transfer(child, tx_context::sender(ctx));`
+
+```
+module collection::dynamic_fields {
+
+    use sui::dynamic_object_field as ofield;
+    use sui::dynamic_field as field;
+
+  // Adds a DFChild to the parent object under the provided name
+  public fun add_dfchild(parent: &mut Parent, child: DFChild, name: vector<u8>) {
+      field::add(&mut parent.id, name, child);
+  }
+
+  // Adds a DOFChild to the parent object under the provided name
+  public entry fun add_dofchild(parent: &mut Parent, child: DOFChild, name: vector<u8>) {
+      ofield::add(&mut parent.id, name, child);
+  }
+}
+```
+
+**映射**: table, table 是对动态字段的封装.
+
+- `table::add`
+- `table::remove`
+- `table::borrow`
+- `table::borrow_mut`
+- `table::coitains`
+- `table::length`
+
+**异构集合 Bag 类型**
+
+vector 和 table 可以保存相同类型的元素，如果对于不同类型的对象，或者在变异时不知道要保存什么类型的对象。则需要异构集合的概念。
+
+- `bag::new(ctx)`
+- `bag::add(&mut bag.items, k, v);`
+- `bag::remove(&mut bag.items, k)`
+- `bag::borrow(&bag.items, k)`
+- `bag::borrow_mut(&mut bag.items, k)`
+- `bag::contains<K>(&bag.items, k)`
+- `bag::length(&bag.items)`
+
+Bag 集合交互的函数签名与与 Table 集合交互的函数签名非常相似,都是对对动态字段的封装. 底层一样的。
+
+主要区别在于在创建新的 Bag 时不需要声明任何类型，并 添加到其中的键值对类型不需要是相同的类型。
