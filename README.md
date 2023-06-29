@@ -4,6 +4,8 @@
 - 中文文档: https://move-book.com/cn/index.html
 - 英文文档:
   - packages: https://move-language.github.io/move/packages.html
+- sui farmework:
+  - docs: https://github.com/MystenLabs/sui/tree/main/crates/sui-framework/docs
 
 ## 创建 SUI 项目
 
@@ -99,6 +101,46 @@ module package_name::module_name {
 - view: `(transcriptObject : &TranscriptObject)`
 - update: `(transcriptObject : &mut TranscriptObject,score :u8)`
 - delete: `(transcriptObject : TranscriptObject)`
+
+**范型**
+
+```
+module Storage{
+  struct Box<T: store + drop> has key, store{
+    value: T
+  }
+}
+```
+
+phantom 关键字
+
+```
+struct Box<T: store> has key, store{
+  id: UID
+  value: T
+}
+struct BoomBox<phantom T> has key{
+  id:UID
+}
+```
+
+```
+public entry fun create_box<T: store>(value: T, ctx: &mut TxContent){}
+```
+
+**witness**: 只能被启动一次，必须具有 drop 能力，使用后必须立即被销毁或丢弃，确保不能重复使用。
+
+**One Time Witness**: (OTW),一个 move 包整个生命周期只能创建这一个 witness。（普通的 witness 无此限制）。OTW 创建的资源可以保证是整个区块链上都是唯一的。
+
+- 名字使用"大写的模块名"
+- 该类型只具有 drop 能力
+
+```
+module fungible_tokens::move{
+  struct MOVE has drop{};  // OTW
+  fun init(witness:MOVE, ctx: &mut TxContext){}
+}
+```
 
 ## 菜单相关的媒体信息
 
